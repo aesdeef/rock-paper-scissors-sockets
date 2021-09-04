@@ -40,3 +40,12 @@ async def echo(websocket: WebSocket, client_id: int):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"Client #{client_id} left the chat")
+
+
+@app.get("/test")
+async def passing_test():
+    """
+    A temporary route just to have a passing test until I figure out how to
+    test WebSockets
+    """
+    return {"msg": "Hello"}
