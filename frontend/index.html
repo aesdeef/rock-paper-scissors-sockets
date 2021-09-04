@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <script src="elm.js"></script>
+</head>
+
+<body>
+  <div id="elm"></div>
+  <script>
+    let app = Elm.Main.init({
+      node: document.getElementById('elm')
+    })
+
+    let socket = new WebSocket("ws://localhost:8000/2")
+    socket.onmessage = msg => app.ports.messageReceiver.send(msg.data)
+    app.ports.sendMessage.subscribe(msg => socket.send(msg))
+  </script>
+</body>
+
+</html>
