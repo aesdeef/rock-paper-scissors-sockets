@@ -13,3 +13,9 @@ def test_echo():
     response = client.get("/test")
     assert response.status_code == 200
     assert response.json() == {"msg": "Hello"}
+
+
+def test_websocket():
+    with client.websocket_connect("/2") as websocket:
+        data = websocket.receive_text()
+        assert data == "Waiting for an opponent"
