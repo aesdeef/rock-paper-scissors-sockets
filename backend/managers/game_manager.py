@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Dict, List, Tuple
 
 from fastapi import WebSocket
@@ -5,12 +6,18 @@ from fastapi import WebSocket
 from .connection_manager import ConnectionManager
 
 
+class Move(str, Enum):
+    ROCK = "rock"
+    PAPER = "paper"
+    SCISSORS = "scissors"
+
+
 class GameManager:
     def __init__(self, connection_manager: ConnectionManager):
         self.connection_manager = connection_manager
         self.games: Dict[int, List[Tuple[WebSocket, str]]] = {}
 
-    async def move(self, game_id: int, player: WebSocket, move: str):
+    async def move(self, game_id: int, player: WebSocket, move: Move):
         if game_id not in self.games:
             self.games[game_id] = []
         self.games[game_id].append((player, move))

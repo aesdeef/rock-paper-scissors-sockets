@@ -19,7 +19,9 @@ class ConnectionManager:
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
 
-    async def broadcast(self, game_id: int, message: str, skip: Optional[WebSocket]):
+    async def broadcast(
+        self, game_id: int, message: str, skip: Optional[WebSocket] = None
+    ):
         for connection in self.active_connections[game_id]:
             if connection != skip:
                 await connection.send_text(message)
