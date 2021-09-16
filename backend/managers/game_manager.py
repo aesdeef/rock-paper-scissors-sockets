@@ -11,6 +11,7 @@ class Move(str, Enum):
     PAPER = "paper"
     SCISSORS = "scissors"
 
+
 class GameManager:
     def __init__(self, connection_manager: ConnectionManager):
         self.connection_manager = connection_manager
