@@ -1,19 +1,11 @@
-from enum import Enum
-
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 from managers.connection_manager import ConnectionManager
-from managers.game_manager import GameManager
+from managers.game_manager import GameManager, Move
 
 app = FastAPI()
 connection_manager = ConnectionManager()
 game_manager = GameManager(connection_manager)
-
-
-class Move(str, Enum):
-    ROCK = "rock"
-    PAPER = "paper"
-    SCISSORS = "scissors"
 
 
 @app.websocket("/{game_id}")
@@ -34,7 +26,7 @@ async def single_game(websocket: WebSocket, game_id: int):
             try:
                 move = Move(data)
                 await connection_manager.send_personal_message(
-                    f"You played {data}", websocket
+                    f"You played {move}", websocket
                 )
                 await game_manager.move(game_id, websocket, move=data)
             except ValueError:
@@ -43,7 +35,7 @@ async def single_game(websocket: WebSocket, game_id: int):
                 )
     except WebSocketDisconnect:
         connection_manager.disconnect(game_id, websocket)
-        await connection_manager.broadcast(game_id, f"Opponent has left the game")
+        await connection_manager.broadcast(game_id, "Opponent has left the game")
 
 
 @app.get("/test")
