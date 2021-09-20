@@ -55,6 +55,7 @@ init flags =
 type Msg
     = DraftChanged String
     | Send
+    | Move String
     | Recv String
 
 
@@ -66,6 +67,9 @@ update msg model =
 
         Send ->
             ( { model | draft = "" }, sendMessage model.draft )
+
+        Move move ->
+            ( model, sendMessage move )
 
         Recv message ->
             ( { model | messages = model.messages ++ [ message ] }, Cmd.none )
@@ -89,6 +93,11 @@ view model =
     div []
         [ h1 [] [ text "Echo Chat" ]
         , ul [] (List.map (\msg -> li [] [ text msg ]) model.messages)
+        , div []
+            [ button [ onClick <| Move "rock" ] [ text "Rock" ]
+            , button [ onClick <| Move "paper" ] [ text "Paper" ]
+            , button [ onClick <| Move "scissors" ] [ text "Scissors" ]
+            ]
         , input
             [ type_ "text"
             , placeholder "Draft"
