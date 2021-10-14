@@ -1,4 +1,7 @@
+import os
+
 from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
+from tortoise.contrib.fastapi import register_tortoise
 
 from app.config import Settings, get_settings
 from app.managers.connection_manager import ConnectionManager
@@ -7,6 +10,14 @@ from app.managers.game_manager import GameManager, Move
 app = FastAPI()
 connection_manager = ConnectionManager()
 game_manager = GameManager(connection_manager)
+
+register_tortoise(
+    app,
+    db_url=os.environ.get("DATABASE_URL"),
+    modules={"models": ["app.models.tortoise"]},
+    generate_schemas=True,
+    add_exception_handlers=True,
+)
 
 
 @app.websocket("/{game_id}")
