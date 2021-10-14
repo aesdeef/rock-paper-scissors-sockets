@@ -1,5 +1,6 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
 
+from app.config import Settings, get_settings
 from app.managers.connection_manager import ConnectionManager
 from app.managers.game_manager import GameManager, Move
 
@@ -45,3 +46,12 @@ async def passing_test():
     test WebSockets
     """
     return {"msg": "Hello"}
+
+
+@app.get("/ping")
+async def pong(settings: Settings = Depends(get_settings)):
+    return {
+        "ping": "pong!",
+        "environment": settings.environment,
+        "testing": settings.testing,
+    }
