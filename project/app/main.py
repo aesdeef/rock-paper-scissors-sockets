@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from managers.connection_manager import ConnectionManager
-from managers.game_manager import GameManager, Move
+from app.managers.connection_manager import ConnectionManager
+from app.managers.game_manager import GameManager, Move
 
 app = FastAPI()
 connection_manager = ConnectionManager()
