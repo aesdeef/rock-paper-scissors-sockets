@@ -1,23 +1,37 @@
-import os
+import logging
 
-from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
-from tortoise.contrib.fastapi import register_tortoise
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from app.config import Settings, get_settings
+from app.api import ping
+from app.db import init_db
 from app.managers.connection_manager import ConnectionManager
 from app.managers.game_manager import GameManager, Move
 
-app = FastAPI()
 connection_manager = ConnectionManager()
 game_manager = GameManager(connection_manager)
 
-register_tortoise(
-    app,
-    db_url=os.environ.get("DATABASE_URL"),
-    modules={"models": ["app.models.tortoise"]},
-    generate_schemas=False,
-    add_exception_handlers=True,
-)
+log = logging.getLogger("uvicorn")
+
+
+def create_application() -> FastAPI:
+    application = FastAPI()
+    application.include_router(ping.router)
+
+    return application
+
+
+app = create_application()
+
+
+@app.on_event("startup")
+async def startup_event():
+    log.info("Starting up...")
+    init_db(app)
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    log.info("Shutting down...")
 
 
 @app.websocket("/{game_id}")
@@ -57,12 +71,3 @@ async def passing_test():
     test WebSockets
     """
     return {"msg": "Hello"}
-
-
-@app.get("/ping")
-async def pong(settings: Settings = Depends(get_settings)):
-    return {
-        "ping": "pong!",
-        "environment": settings.environment,
-        "testing": settings.testing,
-    }
