@@ -1,4 +1,4 @@
-FROM python:3.10.0-slim-buster
+FROM python:3.10.0-buster
 
 RUN mkdir -p /home/app
 RUN addgroup --system app && adduser --system --group app
@@ -13,12 +13,8 @@ ENV PYTHONUNBUFFERED 1
 ENV ENVIRONMENT prod
 ENV TESTING 0
 
-RUN apt update \
-    && apt -y install netcat gcc postgresql \
-    && apt clean
-
-RUN pip install --upgrade pip
 COPY ./requirements.txt .
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install "uvicorn[standard]==0.15.0"
 
