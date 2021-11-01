@@ -1,30 +1,26 @@
-from typing import Dict, List, Optional
-
 from fastapi import WebSocket
 
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: Dict[int, List[WebSocket]] = {}
+        self.active_connections: set[WebSocket] = set()
 
-    async def connect(self, game_id: int, websocket: WebSocket):
+    def get_players(self) -> set[WebSocket]:
+        return self.active_connections
+
+    async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        if game_id not in self.active_connections:
-            self.active_connections[game_id] = []
-        self.active_connections[game_id].append(websocket)
+        self.active_connections.add(websocket)
 
-    def disconnect(self, game_id: int, websocket: WebSocket):
-        self.active_connections[game_id].remove(websocket)
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
 
-    async def broadcast(
-        self, game_id: int, message: str, skip: Optional[WebSocket] = None
-    ):
-        for connection in self.active_connections[game_id]:
-            if connection != skip:
-                await connection.send_text(message)
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
 
-    def connection_count(self, game_id: int) -> int:
-        return len(self.active_connections[game_id])
+    def connection_count(self) -> int:
+        return len(self.active_connections)

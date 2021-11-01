@@ -6,7 +6,7 @@ client = TestClient(app)
 
 
 def test_websocket():
-    with client.websocket_connect("/2") as websocket:
+    with client.websocket_connect("/") as websocket:
         data = websocket.receive_text()
         assert data == "Waiting for an opponent"
 
@@ -15,10 +15,10 @@ def test_sample_game():
     """
     Play a single game and check the received messages
     """
-    with client.websocket_connect("/2") as player1:
+    with client.websocket_connect("/") as player1:
         assert player1.receive_text() == "Waiting for an opponent"
 
-        with client.websocket_connect("/2") as player2:
+        with client.websocket_connect("/") as player2:
             assert (
                 player1.receive_text()
                 == "Opponent found. Choose rock, paper, or scissors."

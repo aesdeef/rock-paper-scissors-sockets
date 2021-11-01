@@ -8,16 +8,16 @@ connection_manager = ConnectionManager()
 game_manager = GameManager(connection_manager)
 
 
-@app.websocket("/{game_id}")
-async def single_game(websocket: WebSocket, game_id: int):
-    await connection_manager.connect(game_id, websocket)
-    if connection_manager.connection_count(game_id) < 2:
+@app.websocket("/")
+async def single_game(websocket: WebSocket):
+    await connection_manager.connect(websocket)
+    if connection_manager.connection_count() < 2:
         await connection_manager.send_personal_message(
             "Waiting for an opponent", websocket
         )
-    elif connection_manager.connection_count(game_id) == 2:
+    elif connection_manager.connection_count() == 2:
         await connection_manager.broadcast(
-            game_id, "Opponent found. Choose rock, paper, or scissors."
+            "Opponent found. Choose rock, paper, or scissors."
         )
 
     try:
@@ -28,11 +28,11 @@ async def single_game(websocket: WebSocket, game_id: int):
                 await connection_manager.send_personal_message(
                     f"You played {move}", websocket
                 )
-                await game_manager.move(game_id, websocket, move)
+                await game_manager.move(websocket, move)
             except ValueError:
                 await connection_manager.send_personal_message(
                     f"Invalid move: {data}", websocket
                 )
     except WebSocketDisconnect:
-        connection_manager.disconnect(game_id, websocket)
-        await connection_manager.broadcast(game_id, "Opponent has left the game")
+        connection_manager.disconnect(websocket)
+        await connection_manager.broadcast("Opponent has left the game")
