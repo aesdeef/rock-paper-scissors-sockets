@@ -2,19 +2,21 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
-client = TestClient(app)
-
 
 def test_websocket():
+    """
+    Create one connection and check the message
+    """
+    client = TestClient(app)
     with client.websocket_connect("/") as websocket:
-        data = websocket.receive_text()
-        assert data == "Waiting for an opponent"
+        assert websocket.receive_text() == "Waiting for an opponent"
 
 
 def test_sample_game():
     """
     Play a single game and check the received messages
     """
+    client = TestClient(app)
     with client.websocket_connect("/") as player1:
         assert player1.receive_text() == "Waiting for an opponent"
 
@@ -29,10 +31,12 @@ def test_sample_game():
             )
 
             player1.send_text("rock")
+
+            assert player1.receive_text() == "You played rock"
+
             player2.send_text("paper")
 
-            assert {player1.receive_text() for _ in range(3)} == {
-                "You played rock",
+            assert {player1.receive_text() for _ in range(2)} == {
                 "Opponent played paper",
                 "You lost!",
             }
@@ -48,6 +52,7 @@ def test_cannot_move_twice():
     """
     Connect two players and try to play two moves from one connection
     """
+    client = TestClient(app)
     with client.websocket_connect("/") as player1:
         player1.receive_text()
 
@@ -63,11 +68,12 @@ def test_cannot_move_twice():
 
 def test_accept_only_two_players():
     """
-    TODO
-    Try to connect as a third player to a game, check the message
-    and make sure the connection is closed by the server
-
-    Note: Currently blocked by
-    https://github.com/aaugustin/websockets/issues/1072
+    Try to connect as a third player to a game and check the message
     """
-    assert True
+    client = TestClient(app)
+    with client.websocket_connect("/") as player1:
+        player1.receive_text()
+        with client.websocket_connect("/") as player2:
+            player2.receive_text()
+            with client.websocket_connect("/") as player3:
+                assert player3.receive_text() == "Sorry, we already have two players"

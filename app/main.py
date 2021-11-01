@@ -1,43 +1,36 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from app.errors import AlreadyPlayedError
-from app.managers.connection_manager import ConnectionManager
-from app.managers.game_manager import GameManager, Move
+from app.errors import AlreadyPlayedError, MaxNumberOfPlayersReached
+from app.game import Game
+from app.move import Move
+from app.player import Player
 
 app = FastAPI()
-connection_manager = ConnectionManager()
-game_manager = GameManager(connection_manager)
+game = Game()
 
 
 @app.websocket("/")
 async def single_game(websocket: WebSocket):
-    await connection_manager.connect(websocket)
-    if connection_manager.connection_count() < 2:
-        await connection_manager.send_personal_message(
-            "Waiting for an opponent", websocket
-        )
-    elif connection_manager.connection_count() == 2:
-        await connection_manager.broadcast(
-            "Opponent found. Choose rock, paper, or scissors."
-        )
+    await websocket.accept()
+    player = Player(websocket)
+    try:
+        await game.add_player(player)
+    except MaxNumberOfPlayersReached:
+        await player.send("Sorry, we already have two players")
+        await player.disconnect()
+        return
 
     try:
         while True:
-            data = await websocket.receive_text()
+            data = await player.receive()
             try:
                 move = Move(data)
-                await game_manager.move(websocket, move)
-                await connection_manager.send_personal_message(
-                    f"You played {move}", websocket
-                )
+                await game.record_move(player, move)
+                await player.send(f"You played {move}")
             except AlreadyPlayedError:
-                await connection_manager.send_personal_message(
-                    "You have already played", websocket
-                )
+                await player.send("You have already played")
             except ValueError:
-                await connection_manager.send_personal_message(
-                    f"Invalid move: {data}", websocket
-                )
+                await player.send(f"Invalid move: {data}")
     except WebSocketDisconnect:
-        connection_manager.disconnect(websocket)
-        await connection_manager.broadcast("Opponent has left the game")
+        game.remove_player(player)
+        await game.broadcast("Opponent has left the game")
