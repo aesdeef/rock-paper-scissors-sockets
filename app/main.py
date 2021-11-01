@@ -1,5 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
+from app.errors import AlreadyPlayedError
 from app.managers.connection_manager import ConnectionManager
 from app.managers.game_manager import GameManager, Move
 
@@ -25,10 +26,14 @@ async def single_game(websocket: WebSocket):
             data = await websocket.receive_text()
             try:
                 move = Move(data)
+                await game_manager.move(websocket, move)
                 await connection_manager.send_personal_message(
                     f"You played {move}", websocket
                 )
-                await game_manager.move(websocket, move)
+            except AlreadyPlayedError:
+                await connection_manager.send_personal_message(
+                    "You have already played", websocket
+                )
             except ValueError:
                 await connection_manager.send_personal_message(
                     f"Invalid move: {data}", websocket

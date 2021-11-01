@@ -31,10 +31,31 @@ def test_sample_game():
             player1.send_text("rock")
             player2.send_text("paper")
 
-            assert player1.receive_text() == "You played rock"
-            assert player1.receive_text() == "Opponent played paper"
-            assert player1.receive_text() == "You lost!"
+            assert {player1.receive_text() for _ in range(3)} == {
+                "You played rock",
+                "Opponent played paper",
+                "You lost!",
+            }
 
-            assert player2.receive_text() == "You played paper"
-            assert player2.receive_text() == "Opponent played rock"
-            assert player2.receive_text() == "You won!"
+            assert {player2.receive_text() for _ in range(3)} == {
+                "You played paper",
+                "Opponent played rock",
+                "You won!",
+            }
+
+
+def test_cannot_move_twice():
+    """
+    Connect two players and try to play two moves from one connection
+    """
+    with client.websocket_connect("/") as player1:
+        player1.receive_text()
+
+        with client.websocket_connect("/") as player2:
+            player1.receive_text()
+            player2.receive_text()
+
+            player1.send_text("rock")
+            assert player1.receive_text() == "You played rock"
+            player1.send_text("rock")
+            assert player1.receive_text() == "You have already played"

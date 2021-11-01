@@ -2,6 +2,7 @@ from enum import Enum, auto
 
 from fastapi import WebSocket
 
+from app.errors import AlreadyPlayedError
 from app.managers.connection_manager import ConnectionManager
 
 
@@ -44,6 +45,9 @@ class GameManager:
         self.game: dict[WebSocket, Move] = {}
 
     async def move(self, player: WebSocket, move: Move):
+        if player in self.game:
+            raise AlreadyPlayedError()
+
         self.game[player] = move
         if len(self.game) == 2:
             await self.resolve_game()

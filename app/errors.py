@@ -1,0 +1,2 @@
+class AlreadyPlayedError(Exception):
+    pass
