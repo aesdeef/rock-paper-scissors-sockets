@@ -3,14 +3,14 @@ A web app for playing rock paper scissors built with FastApi and Elm using WebSo
 
 # Setup
 ## Backend
-Create a virtual environment and run
+Create a virtual environment and run (in the root directory)
 ```
-pip install fastapi
+pip install -r app/requirements.txt
 pip install uvicorn[standard]
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 ## Frontend
-Run
+In the `frontend` directory run
 ```
 npx elm-live -p 8080 -- src/Main.elm --output elm.js
 ```
