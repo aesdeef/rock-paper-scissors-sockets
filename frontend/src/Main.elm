@@ -42,7 +42,7 @@ type alias Model =
 
 
 init : () -> ( Model, Cmd Msg )
-init flags =
+init _ =
     ( { draft = "", messages = [] }
     , Cmd.none
     )

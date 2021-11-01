@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple
 
 from fastapi import WebSocket
 
-from .connection_manager import ConnectionManager
+from app.managers.connection_manager import ConnectionManager
 
 
 class Move(str, Enum):

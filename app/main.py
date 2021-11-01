@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from managers.connection_manager import ConnectionManager
-from managers.game_manager import GameManager, Move
+from app.managers.connection_manager import ConnectionManager
+from app.managers.game_manager import GameManager, Move
 
 app = FastAPI()
 connection_manager = ConnectionManager()
@@ -28,7 +28,7 @@ async def single_game(websocket: WebSocket, game_id: int):
                 await connection_manager.send_personal_message(
                     f"You played {move}", websocket
                 )
-                await game_manager.move(game_id, websocket, move=data)
+                await game_manager.move(game_id, websocket, move)
             except ValueError:
                 await connection_manager.send_personal_message(
                     f"Invalid move: {data}", websocket
@@ -36,12 +36,3 @@ async def single_game(websocket: WebSocket, game_id: int):
     except WebSocketDisconnect:
         connection_manager.disconnect(game_id, websocket)
         await connection_manager.broadcast(game_id, "Opponent has left the game")
-
-
-@app.get("/test")
-async def passing_test():
-    """
-    A temporary route just to have a passing test until I figure out how to
-    test WebSockets
-    """
-    return {"msg": "Hello"}

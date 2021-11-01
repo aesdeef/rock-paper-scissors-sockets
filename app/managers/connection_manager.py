@@ -26,5 +26,5 @@ class ConnectionManager:
             if connection != skip:
                 await connection.send_text(message)
 
-    def connection_count(self, game_id: int):
+    def connection_count(self, game_id: int) -> int:
         return len(self.active_connections[game_id])
