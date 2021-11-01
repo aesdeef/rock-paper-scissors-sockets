@@ -20,11 +20,6 @@ async def single_game(websocket: WebSocket):
         await player.disconnect()
         return
 
-    if game.player_count() < 2:
-        await player.send("Waiting for an opponent")
-    elif game.player_count() == 2:
-        await game.broadcast("Opponent found. Choose rock, paper, or scissors.")
-
     try:
         while True:
             data = await player.receive()

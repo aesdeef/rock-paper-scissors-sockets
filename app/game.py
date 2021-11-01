@@ -20,6 +20,11 @@ class Game:
         else:
             raise MaxNumberOfPlayersReached
 
+        if self.player_count() < 2:
+            await player.send("Waiting for an opponent")
+        elif self.player_count() == 2:
+            await self.broadcast("Opponent found. Choose rock, paper, or scissors.")
+
     def remove_player(self, player: Player):
         self.players.remove(player)
 
