@@ -14,7 +14,7 @@
       node: document.getElementById('elm')
     })
 
-    let socket = new WebSocket("ws://localhost:8000/2")
+    let socket = new WebSocket("ws://localhost:8000/")
     socket.onmessage = msg => app.ports.messageReceiver.send(msg.data)
     app.ports.sendMessage.subscribe(msg => socket.send(msg))
   </script>

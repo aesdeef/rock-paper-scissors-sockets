@@ -59,3 +59,15 @@ def test_cannot_move_twice():
             assert player1.receive_text() == "You played rock"
             player1.send_text("rock")
             assert player1.receive_text() == "You have already played"
+
+
+def test_accept_only_two_players():
+    """
+    TODO
+    Try to connect as a third player to a game, check the message
+    and make sure the connection is closed by the server
+
+    Note: Currently blocked by
+    https://github.com/aaugustin/websockets/issues/1072
+    """
+    assert True

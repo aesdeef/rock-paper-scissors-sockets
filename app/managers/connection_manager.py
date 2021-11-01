@@ -10,7 +10,14 @@ class ConnectionManager:
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        self.active_connections.add(websocket)
+
+        if self.connection_count() < 2:
+            self.active_connections.add(websocket)
+        else:
+            await self.send_personal_message(
+                "Sorry, we already have two players", websocket
+            )
+            await websocket.close()
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
